@@ -7,26 +7,21 @@ import (
 )
 
 func main() {
-	//	testGenerateImage()
+	testGenerateImage()
 	//	testGenerateOtaPackage()
 	//	testMd5sum()
-	testRecordMd5()
+	//	testRecordMd5()
 }
 
 func testGenerateImage() {
-	root_dir := "/home/manson/temp/test/tmp/comp/"
-	dest_path := "/home/manson/temp/test/tmp/comp/radio.img"
+	dest_path := "/home/manson/temp/test/tmp/radio.img"
 	comp_list := make([]file.Component, 4)
-	comp_list[0] = file.Component{"single_cp.bin", 0}
-	comp_list[1] = file.Component{"single_dsp.bin", 8388608}
-	comp_list[2] = file.Component{"dsds_cp.bin", 10485760}
-	comp_list[3] = file.Component{"dsds_dsp.bin", 18874368}
+	comp_list[0] = file.Component{"/home/manson/temp/test/tmp/HL_TD_CP.bin", 0}
+	comp_list[1] = file.Component{"/home/manson/temp/test/tmp/HL_TD_M08_AI_A0_Flash.bin", 8388608}
+	comp_list[2] = file.Component{"/home/manson/temp/test/tmp/HL_TD_DSDS_CP.bin", 10485760}
+	comp_list[3] = file.Component{"/home/manson/temp/test/tmp/HL_TD_M08_AI_A0_DSDS_Flash.bin", 18874368}
 
-	args := make(map[string]interface{})
-	args[file.ROOT_DIR_KEY] = root_dir
-	args[file.DEST_PATH_KEY] = dest_path
-
-	err := file.GenerateImage(comp_list, args)
+	err := file.GenerateImage(comp_list, dest_path, 0)
 	if err == nil {
 		fmt.Println("test GenerateImage [PASS]")
 	} else {

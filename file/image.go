@@ -1,57 +1,37 @@
 package file
 
 import (
-	"errors"
-	"fmt"
 	"io"
 	"os"
 )
 
 const (
 	IMAGE_SIZE          = 20971520
-	ROOT_DIR_KEY        = "root_dir"
-	IMAGE_SIZE_KEY      = "image_size"
-	DEST_PATH_KEY       = "dest_path"
 	IMAGE_FILE_ACCESS   = 0644
 	DEFAULT_BUFFER_SIZE = 4096
+	DEFAULT_IMAGE_NAME  = "radio.img"
 )
 
 type Component struct {
-	Name   string
+	Path   string
 	Offset int64
 }
 
-func GenerateImage(comp_list []Component, args map[string]interface{}) error {
-	var image_size int64 = IMAGE_SIZE
-	var root_dir string
-	var dest_path string
-
-	//we should check it's type???It must be a map here.
-	if args == nil {
-		return errors.New(fmt.Sprintf("args cannot be nil!\n"))
+func GenerateImage(comp_list []Component, dest string, image_size int64) error {
+	if dest == "" {
+		dest = DEFAULT_IMAGE_NAME
 	}
 
-	if _, ok := args[ROOT_DIR_KEY]; !ok {
-		return errors.New(fmt.Sprintf("args miss %s!\n", ROOT_DIR_KEY))
+	if image_size <= 0 {
+		image_size = IMAGE_SIZE
 	}
-	root_dir = args[ROOT_DIR_KEY].(string)
 
-	if _, ok := args[DEST_PATH_KEY]; !ok {
-		return errors.New(fmt.Sprintf("args miss %s!\n", DEST_PATH_KEY))
-	}
-	dest_path = args[DEST_PATH_KEY].(string)
-
-	if _, ok := args[IMAGE_SIZE_KEY]; ok {
-		image_size = args[IMAGE_SIZE_KEY].(int64)
-	}
-	dest_path = args[DEST_PATH_KEY].(string)
-
-	if isExist, err := IsFileExist(dest_path); isExist || err != nil {
+	if isExist, err := IsFileExist(dest); isExist || err != nil {
 		//if it's exist or error occurs when stat it, we should delete it first
-		DeleteFile(dest_path)
+		DeleteFile(dest)
 	}
 
-	image_file, err := os.OpenFile(dest_path, os.O_WRONLY|os.O_CREATE, IMAGE_FILE_ACCESS)
+	image_file, err := os.OpenFile(dest, os.O_WRONLY|os.O_CREATE, IMAGE_FILE_ACCESS)
 	if err != nil {
 		return err
 	}
@@ -60,7 +40,7 @@ func GenerateImage(comp_list []Component, args map[string]interface{}) error {
 	buffer := make([]byte, DEFAULT_BUFFER_SIZE)
 
 	for _, src := range comp_list {
-		f, err := os.OpenFile(root_dir+src.Name, os.O_RDONLY, 0)
+		f, err := os.OpenFile(src.Path, os.O_RDONLY, 0)
 		if err != nil {
 			return err
 		}
