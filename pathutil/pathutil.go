@@ -1,12 +1,14 @@
 package pathutil
 
 import (
-	"strings"
+	"io/ioutil"
 	"os"
+	"strings"
 )
 
 const (
-	SLASH = string(os.PathSeparator)
+	SLASH              = string(os.PathSeparator)
+	DEFAULT_DIR_ACCESS = 0755
 )
 
 func SplitPath(path string) []string {
@@ -56,4 +58,63 @@ func BaseName(path string) string {
 		return list[len(list)-1]
 	}
 	return ""
+}
+
+func MkDirSpecificMode(path string, mode os.FileMode) error {
+	exist, err := IsExist(path)
+	if err == nil {
+		if !exist {
+			return os.MkdirAll(path, mode)
+		} else if exist && err == nil {
+			return nil
+		}
+	}
+	return err
+}
+
+func MkDir(path string) error {
+	exist, err := IsExist(path)
+	if err == nil {
+		if !exist {
+			return os.MkdirAll(path, DEFAULT_DIR_ACCESS)
+		} else if exist && err == nil {
+			return nil
+		}
+	}
+	return err
+}
+
+func IsExist(path string) (bool, error) {
+	_, err := os.Stat(path)
+	if err != nil {
+		if os.IsNotExist(err) {
+			return false, nil
+		}
+		return false, err
+	}
+	return true, nil
+}
+
+func ListFilesRecursive(prefix, path string, b bool) []string {
+	fileInfos, err := ioutil.ReadDir(path)
+	if err != nil {
+		return nil
+	}
+
+	list := make([]string, 0, 10)
+	var dir_name string
+	if !b {
+		dir_name = ""
+	} else {
+		dir_name = BaseName(path) + SLASH
+	}
+	for _, info := range fileInfos {
+		if info.IsDir() {
+			tmp_list := ListFilesRecursive(prefix+dir_name, path+info.Name()+SLASH, true)
+			list = append(list, tmp_list...)
+		} else if info.Mode().IsRegular() {
+			list = append(list, prefix+dir_name+info.Name())
+		}
+	}
+	return list
 }

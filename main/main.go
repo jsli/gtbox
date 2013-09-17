@@ -2,15 +2,67 @@ package main
 
 import (
 	"fmt"
+	"github.com/jsli/gtbox/archive"
 	"github.com/jsli/gtbox/file"
 	"github.com/jsli/gtbox/ota"
+	"github.com/jsli/gtbox/pathutil"
 )
 
+func checkErr(err error, tag string) {
+	if err == nil {
+		fmt.Printf("test %s [PASS]\n", tag)
+	} else {
+		fmt.Printf("test %s [FAIL]\n", tag)
+		fmt.Printf("error: %s\n", err)
+	}
+}
+
 func main() {
-	testGenerateImage()
+	//	testGenerateImage()
 	//	testGenerateOtaPackage()
 	//	testMd5sum()
 	//	testRecordMd5()
+	//	testMkDir()
+	//	testUnZip()
+	//	testZip()
+	//	testCopyFile()
+	testCopyDir()
+}
+
+func testCopyDir() {
+//	src := "/home/manson/temp/test/tmp/sss"
+	src := "/home/manson/temp/test/tmp/sss/"
+	dest := "/home/manson/temp/test/tmp/aaa"
+//	dest := "/home/manson/temp/test/tmp/aaa/"
+	err := file.CopyDir(src, dest)
+	checkErr(err, "file.CopyDir")
+}
+
+func testCopyFile() {
+	src := "/home/manson/temp/test/tmp/radio.img"
+	dest := "/home/manson/temp/test/tmp/cp_radio.img"
+	//	dest := "/home/manson/temp/test/tmp/sss/"
+	//	dest := "/home/manson/temp/test/tmp/sss/cp.img"
+	//	dest := "/home/manson/temp/test/tmp/sss/cp/"
+	//	dest := "/home/manson/temp/test/tmp/sss/cp/cp.img"
+	_, err := file.CopyFile(src, dest)
+	checkErr(err, "file.CopyFile")
+}
+
+func testZip() {
+	err := archive.ArchiveZipFile("/home/manson/temp/test/tmp/unzip/", "/home/manson/temp/test/tmp/unzip.zip")
+	checkErr(err, "archive.ArchiveZipFile")
+}
+
+func testUnZip() {
+	err := archive.ExtractZipFile("/home/manson/temp/test/tmp/update_pkg.zip", "/home/manson/temp/test/tmp/unzip")
+	checkErr(err, "archive.ExtractZipFile")
+}
+
+func testMkDir() {
+	path := "/home/manson/temp/test/tmp/dir"
+	err := pathutil.MkDir(path)
+	checkErr(err, "pathutil.MkDir")
 }
 
 func testGenerateImage() {
