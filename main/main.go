@@ -6,6 +6,7 @@ import (
 	"github.com/jsli/gtbox/file"
 	"github.com/jsli/gtbox/ota"
 	"github.com/jsli/gtbox/pathutil"
+	"os"
 )
 
 func checkErr(err error, tag string) {
@@ -18,22 +19,30 @@ func checkErr(err error, tag string) {
 }
 
 func main() {
-	//	testGenerateImage()
-	//	testGenerateOtaPackage()
-	//	testMd5sum()
-	//	testRecordMd5()
-	//	testMkDir()
-	//	testUnZip()
-	//	testZip()
-	//	testCopyFile()
+	testGenerateImage()
+	testGenerateOtaPackage()
+	testMd5sum()
+	testRecordMd5()
+	testMkDir()
+	testUnZip()
+	testZip()
+	testCopyFile()
 	testCopyDir()
+	testWriteReader2File()
+}
+
+func testWriteReader2File() {
+	src, _ := os.Open("/home/manson/temp/test/tmp/radio.img")
+	dest := "/home/manson/temp/test/tmp/test.img"
+	err := file.WriteReader2File(src, dest)
+	checkErr(err, "file.WriteReader2File")
 }
 
 func testCopyDir() {
-//	src := "/home/manson/temp/test/tmp/sss"
+	//	src := "/home/manson/temp/test/tmp/sss"
 	src := "/home/manson/temp/test/tmp/sss/"
 	dest := "/home/manson/temp/test/tmp/aaa"
-//	dest := "/home/manson/temp/test/tmp/aaa/"
+	//	dest := "/home/manson/temp/test/tmp/aaa/"
 	err := file.CopyDir(src, dest)
 	checkErr(err, "file.CopyDir")
 }
@@ -74,12 +83,7 @@ func testGenerateImage() {
 	comp_list[3] = file.Component{"/home/manson/temp/test/tmp/HL_TD_M08_AI_A0_DSDS_Flash.bin", 18874368}
 
 	err := file.GenerateImage(comp_list, dest_path, 0)
-	if err == nil {
-		fmt.Println("test GenerateImage [PASS]")
-	} else {
-		fmt.Println("test GenerateImage [FAIL]")
-		fmt.Println("error: ", err)
-	}
+	checkErr(err, "file.GenerateImage")
 }
 
 func testGenerateOtaPackage() {
@@ -91,31 +95,16 @@ func testGenerateOtaPackage() {
 	cmd_params[4] = "--zipfile=/home/manson/temp/test/tmp/update_pkg.zip"
 
 	err := ota.GenerateOtaPackage("/home/manson/server/ota/new/radio/updatetool/updatemk", cmd_params)
-	if err == nil {
-		fmt.Println("test GenerateOtaPackage [PASS]")
-	} else {
-		fmt.Println("test GenerateOtaPackage [FAIL]")
-		fmt.Println("error: ", err)
-	}
+	checkErr(err, "ota.GenerateOtaPackage")
 }
 
 func testMd5sum() {
 	md5, err := file.Md5Sum("/home/manson/temp/test/tmp/update.zip")
-	if err == nil {
-		fmt.Println("test GenerateOtaPackage [PASS]")
-		fmt.Println(md5)
-	} else {
-		fmt.Println("test GenerateOtaPackage [FAIL]")
-		fmt.Println("error: ", err)
-	}
+	checkErr(err, "file.Md5Sum")
+	fmt.Println(md5)
 }
 
 func testRecordMd5() {
 	err := ota.RecordMd5("/home/manson/temp/test/tmp/update.zip", "/home/manson/temp/test/tmp/checksum.txt")
-	if err == nil {
-		fmt.Println("test RecordMd5 [PASS]")
-	} else {
-		fmt.Println("test RecordMd5 [FAIL]")
-		fmt.Println("error: ", err)
-	}
+	checkErr(err, "ota.RecordMd5")
 }

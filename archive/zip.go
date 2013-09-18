@@ -2,7 +2,6 @@ package archive
 
 import (
 	"archive/zip"
-	"fmt"
 	"github.com/jsli/gtbox/pathutil"
 	"io"
 	"os"
@@ -22,7 +21,6 @@ func ExtractZipFile(src string, dest string) error {
 	for _, zf := range rc.File {
 		if strings.HasSuffix(zf.Name, pathutil.SLASH) {
 			os.MkdirAll(dest+zf.Name, zf.Mode())
-			fmt.Println(dest + zf.Name)
 			continue
 		}
 

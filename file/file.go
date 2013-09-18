@@ -11,6 +11,10 @@ import (
 	"strings"
 )
 
+const (
+	DEFAULT_FILE_ACCESS = 0644
+)
+
 func Md5Sum(path string) (string, error) {
 	f, err := os.Open(path)
 	if err != nil {
@@ -52,6 +56,7 @@ func do_delete(path string) error {
 }
 
 func WriteString2File(content, path string) error {
+	DeleteFile(path)
 	fw, err := os.Create(path)
 	if err != nil {
 		return fmt.Errorf("write failed %s : %s", path, err)
@@ -66,6 +71,7 @@ func WriteString2File(content, path string) error {
 }
 
 func CopyFile(src, dest string) (int64, error) {
+	DeleteFile(dest)
 	fi, fi_err := os.Stat(src)
 	if fi_err != nil {
 		return 0, fi_err
@@ -140,26 +146,26 @@ func GetFileMode(path string) (os.FileMode, error) {
 	return fi.Mode(), nil
 }
 
-//func CopyFile(src io.Reader, dest string) error {
-//	tag := "CopyFile"
-//	content, err := ioutil.ReadAll(src)
-//	if err != nil || len(content) == 0 {
-//		log.Log(tag, fmt.Sprintf("Failed to read file:\n err = %s", err))
-//		return err
-//	}
-//
-//	destFile, err := os.OpenFile(dest, os.O_CREATE|os.O_WRONLY, constant.DEFAULT_FILE_ACCESS)
-//	if err != nil {
-//		log.Log(tag, fmt.Sprintf("Failed to open file %s :\n err = %s", dest, err))
-//		return err
-//	}
-//	defer destFile.Close()
-//
-//	_, err = destFile.Write(content)
-//	if err != nil {
-//		log.Log(tag, fmt.Sprintf("Failed to write file %s :\n err = %s", dest, err))
-//		return err
-//	}
-//	log.Log(tag, fmt.Sprintf("Copy to %s success!", dest))
-//	return nil
-//}
+func WriteReader2File(src io.Reader, dest string) error {
+	DeleteFile(dest)
+	content, err := ioutil.ReadAll(src)
+	if err != nil {
+		return err
+	}
+
+	if len(content) == 0 {
+		return fmt.Errorf("Empty Reader.")
+	}
+
+	destFile, err := os.OpenFile(dest, os.O_CREATE|os.O_WRONLY, DEFAULT_FILE_ACCESS)
+	if err != nil {
+		return err
+	}
+	defer destFile.Close()
+
+	_, err = destFile.Write(content)
+	if err != nil {
+		return err
+	}
+	return nil
+}
