@@ -15,7 +15,14 @@ const (
 	DEFAULT_FILE_ACCESS = 0644
 )
 
-func Md5Sum(path string) (string, error) {
+func Md5SumString(original string) string {
+	md5h := md5.New()
+	io.WriteString(md5h, original)
+	md5_str := hex.EncodeToString(md5h.Sum(nil))
+	return md5_str
+}
+
+func Md5SumFile(path string) (string, error) {
 	f, err := os.Open(path)
 	if err != nil {
 		return "", fmt.Errorf("Open md5 file failed %s : %s", path, err)
@@ -32,7 +39,7 @@ func Md5Sum(path string) (string, error) {
 	return md5_str, nil
 }
 
-func IsFileExist(path string) (bool, error) {
+func isExist(path string) (bool, error) {
 	_, err := os.Stat(path)
 	if err != nil {
 		if os.IsNotExist(err) {
@@ -41,6 +48,14 @@ func IsFileExist(path string) (bool, error) {
 		return false, err
 	}
 	return true, nil
+}
+
+func IsDirExist(path string) (bool, error) {
+	return isExist(path)
+}
+
+func IsFileExist(path string) (bool, error) {
+	return isExist(path)
 }
 
 func DeleteFile(path string) error {
@@ -53,6 +68,21 @@ func DeleteDir(path string) error {
 
 func do_delete(path string) error {
 	return os.RemoveAll(path)
+}
+
+func WriteBytes2File(content []byte, path string) error {
+	DeleteFile(path)
+	fw, err := os.Create(path)
+	if err != nil {
+		return fmt.Errorf("write failed %s : %s", path, err)
+	}
+	defer fw.Close()
+
+	_, err = fw.Write(content)
+	if err != nil {
+		return fmt.Errorf("write failed %s : %s", path, err)
+	}
+	return nil
 }
 
 func WriteString2File(content, path string) error {
@@ -146,6 +176,14 @@ func GetFileMode(path string) (os.FileMode, error) {
 	return fi.Mode(), nil
 }
 
+func GetFileSize(path string) (int64, error) {
+	fi, err := os.Stat(path)
+	if err != nil {
+		return 0, err
+	}
+	return fi.Size(), nil
+}
+
 func WriteReader2File(src io.Reader, dest string) error {
 	DeleteFile(dest)
 	content, err := ioutil.ReadAll(src)
@@ -168,4 +206,28 @@ func WriteReader2File(src io.Reader, dest string) error {
 		return err
 	}
 	return nil
+}
+
+func ReadFile(path string) (string, error) {
+	f, err := os.Open(path)
+	if err != nil {
+		return "", err
+	}
+
+	content, err := ioutil.ReadAll(f)
+	if err != nil {
+		return "", err
+	}
+
+	return string(content), nil
+}
+
+func ReadBinaryFile(path string) (content []byte, err error) {
+	f, err := os.Open(path)
+	if err != nil {
+		return
+	}
+
+	content, err = ioutil.ReadAll(f)
+	return
 }

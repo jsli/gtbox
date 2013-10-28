@@ -84,6 +84,17 @@ func MkDir(path string) error {
 	return err
 }
 
+func IsDir(path string) (bool, error) {
+	fi, err := os.Stat(path)
+	if err != nil {
+		return false, err
+	}
+	if fi.IsDir() {
+		return true, nil
+	}
+	return false, nil
+}
+
 func IsExist(path string) (bool, error) {
 	_, err := os.Stat(path)
 	if err != nil {

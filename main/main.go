@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"github.com/jsli/gtbox/archive"
 	"github.com/jsli/gtbox/file"
-	"github.com/jsli/gtbox/ota"
 	"github.com/jsli/gtbox/pathutil"
 	"os"
 )
@@ -19,16 +18,18 @@ func checkErr(err error, tag string) {
 }
 
 func main() {
-	testGenerateImage()
-	testGenerateOtaPackage()
-	testMd5sum()
-	testRecordMd5()
-	testMkDir()
-	testUnZip()
-	testZip()
-	testCopyFile()
-	testCopyDir()
-	testWriteReader2File()
+	//	testGenerateImage()
+	//	testGenerateOtaPackage()
+	//	testMd5sum()
+	//	testRecordMd5()
+	//	testMkDir()
+	//	testUnZip()
+	//	testZip()
+	//	testCopyFile()
+	//	testCopyDir()
+	//	testWriteReader2File()
+	//	testParseDtim()
+	testGenerateRandFileName()
 }
 
 func testWriteReader2File() {
@@ -102,9 +103,4 @@ func testMd5sum() {
 	md5, err := file.Md5Sum("/home/manson/temp/test/tmp/update.zip")
 	checkErr(err, "file.Md5Sum")
 	fmt.Println(md5)
-}
-
-func testRecordMd5() {
-	err := ota.RecordMd5("/home/manson/temp/test/tmp/update.zip", "/home/manson/temp/test/tmp/checksum.txt")
-	checkErr(err, "ota.RecordMd5")
 }
