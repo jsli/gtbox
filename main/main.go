@@ -23,13 +23,13 @@ func main() {
 	//	testMd5sum()
 	//	testRecordMd5()
 	//	testMkDir()
-	//	testUnZip()
+	testUnZip()
 	//	testZip()
 	//	testCopyFile()
 	//	testCopyDir()
 	//	testWriteReader2File()
 	//	testParseDtim()
-	testGenerateRandFileName()
+	//	testGenerateRandFileName()
 }
 
 func testWriteReader2File() {
@@ -65,7 +65,7 @@ func testZip() {
 }
 
 func testUnZip() {
-	err := archive.ExtractZipFile("/home/manson/temp/test/tmp/update_pkg.zip", "/home/manson/temp/test/tmp/unzip")
+	err := archive.ExtractZipFile("/home/manson/OTA/tmp/2322946214036533104/update_pkg.zip", "/home/manson/OTA/tmp/2322946214036533104/abc/")
 	checkErr(err, "archive.ExtractZipFile")
 }
 
@@ -85,22 +85,4 @@ func testGenerateImage() {
 
 	err := file.GenerateImage(comp_list, dest_path, 0)
 	checkErr(err, "file.GenerateImage")
-}
-
-func testGenerateOtaPackage() {
-	cmd_params := make([]string, 5)
-	cmd_params[0] = "--platform=jb-4.2"
-	cmd_params[1] = "--product=pxa1t88ff_def"
-	cmd_params[2] = "--oem=marvell"
-	cmd_params[3] = "--output=/home/manson/temp/test/tmp/update.zip"
-	cmd_params[4] = "--zipfile=/home/manson/temp/test/tmp/update_pkg.zip"
-
-	err := ota.GenerateOtaPackage("/home/manson/server/ota/new/radio/updatetool/updatemk", cmd_params)
-	checkErr(err, "ota.GenerateOtaPackage")
-}
-
-func testMd5sum() {
-	md5, err := file.Md5Sum("/home/manson/temp/test/tmp/update.zip")
-	checkErr(err, "file.Md5Sum")
-	fmt.Println(md5)
 }

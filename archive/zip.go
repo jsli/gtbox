@@ -18,30 +18,41 @@ func ExtractZipFile(src string, dest string) error {
 	}
 	defer rc.Close()
 
-	for _, zf := range rc.File {
-		if strings.HasSuffix(zf.Name, pathutil.SLASH) {
-			os.MkdirAll(dest+zf.Name, zf.Mode())
-			continue
+	for _, zf := range rc.Reader.File {
+		name := zf.Name
+		mode := zf.Mode()
+		if mode.IsDir() {
+			os.MkdirAll(dest+name, zf.Mode())
+		} else {
+			parent_path := pathutil.ParentPath(dest + name)
+			os.MkdirAll(parent_path, pathutil.DEFAULT_DIR_ACCESS)
+			if err := unpackZippedFile(dest, name, zf); err != nil {
+				return err
+			}
+			os.Chmod(dest+name, mode)
 		}
-
-		reader, err := zf.Open()
-		if err != nil {
-			return err
-		}
-
-		//There is a BUG!!!S
-		//can't save ModeSymlink to it !!!!!!
-		fw, err := os.OpenFile(dest+pathutil.SLASH+zf.Name, os.O_CREATE|os.O_WRONLY, zf.Mode())
-		if err != nil {
-			return err
-		}
-
-		if _, err := io.Copy(fw, reader); err != nil {
-			return err
-		}
-		fw.Close()
-		reader.Close()
 	}
+
+	return nil
+}
+
+func unpackZippedFile(path string, name string, zf *zip.File) error {
+	writer, err := os.Create(path + name)
+	if err != nil {
+		return err
+	}
+	defer writer.Close()
+
+	reader, err := zf.Open()
+	if err != nil {
+		return err
+	}
+	defer reader.Close()
+
+	if _, err := io.Copy(writer, reader); err != nil {
+		return err
+	}
+
 	return nil
 }
 
@@ -60,19 +71,36 @@ func ArchiveZipFile(src, dest string) error {
 	defer w.Close()
 
 	for _, str := range list {
-		f, err := w.Create(str)
-		if err != nil {
+		if err := writeFile2Zip(w, src, str); err != nil {
 			return err
 		}
-		reader, err := os.OpenFile(src+str, os.O_RDONLY, 0644)
-		if err != nil {
-			return err
-		}
-
-		if _, err := io.Copy(f, reader); err != nil {
-			return err
-		}
-		reader.Close()
 	}
 	return nil
+}
+
+func writeFile2Zip(zw *zip.Writer, path string, name string) error {
+	file, err := os.Open(path + name)
+	if err != nil {
+		return err
+	}
+	defer file.Close()
+
+	info, err := file.Stat()
+	if err != nil {
+		return err
+	}
+
+	header, err := zip.FileInfoHeader(info)
+	if err != nil {
+		return err
+	}
+	header.Name = name
+
+	writer, err := zw.CreateHeader(header)
+	if err != nil {
+		return err
+	}
+
+	_, err = io.Copy(writer, file)
+	return err
 }
