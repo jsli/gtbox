@@ -184,6 +184,14 @@ func GetFileSize(path string) (int64, error) {
 	return fi.Size(), nil
 }
 
+func GetFileModifyTs(path string) (int64, error) {
+	fi, err := os.Stat(path)
+	if err != nil {
+		return 0, err
+	}
+	return fi.ModTime().Unix(), nil
+}
+
 func WriteReader2File(src io.Reader, dest string) error {
 	DeleteFile(dest)
 	content, err := ioutil.ReadAll(src)
