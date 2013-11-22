@@ -221,6 +221,7 @@ func ReadFile(path string) (string, error) {
 	if err != nil {
 		return "", err
 	}
+	defer f.Close()
 
 	content, err := ioutil.ReadAll(f)
 	if err != nil {
@@ -235,6 +236,7 @@ func ReadBinaryFile(path string) (content []byte, err error) {
 	if err != nil {
 		return
 	}
+	defer f.Close()
 
 	content, err = ioutil.ReadAll(f)
 	return
